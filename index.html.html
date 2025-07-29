@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roteiro de Viagem - Mendoza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.311.0/lucide.min.css" xintegrity="sha512-47kTf7HlP2g3sMbscfC9TTsW2g26S2J9snbb3+s89I93s2203s2d5s3e5s4s2s1s2s9s8s7s6s5s4s3s2s1s0z=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #6d28d9; /* Cor roxa para combinar com o tema */
+            animation: spin 1s ease infinite;
+        }
+        .gemini-result h5 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-result ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .gemini-result li {
+            margin-bottom: 0.25rem;
+        }
+        /* Correção do Bug da Linha do Tempo */
+        .timeline-item-content {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="max-w-lg mx-auto bg-white min-h-screen shadow-2xl shadow-slate-300">
+        <!-- Cabeçalho Fixo -->
+        <header class="sticky top-0 bg-white/80 backdrop-blur-lg z-20 border-b border-slate-200">
+            <div class="px-4 pt-6 pb-2 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Roteiro de Viagem</h1>
+                    <p class="text-md text-purple-700 font-semibold">Mendoza</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button data-modal-id="packingList" class="modal-trigger-btn text-purple-600 hover:bg-purple-100 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-suitcase"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+                    </button>
+                    <button data-modal-id="share" class="modal-trigger-btn text-purple-600 hover:bg-purple-100 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Navegação de Datas -->
+            <nav id="date-nav" class="px-4 pt-2 pb-3 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <!-- As abas de data serão inseridas aqui pelo JavaScript -->
+            </nav>
+        </header>
+
+        <!-- Conteúdo do Itinerário -->
+        <main id="itinerary-content" class="p-4 pb-24 bg-slate-50">
+            <!-- O conteúdo do dia selecionado será inserido aqui -->
+        </main>
+
+        <!-- Botão Flutuante para Resumo Financeiro -->
+        <div class="fixed bottom-6 right-6 z-30">
+            <button data-modal-id="financialSummary" class="modal-trigger-btn bg-purple-600 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center hover:bg-purple-700 transition-transform transform hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div id="generic-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto modal-content transform scale-95 flex flex-col" style="max-height: 90vh;">
+            <div class="flex-shrink-0 flex justify-between items-center p-6 border-b border-slate-200">
+                <h2 id="modal-title" class="text-xl font-bold text-slate-900"></h2>
+                <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="modal-details" class="flex-grow p-4 md:p-6 overflow-y-auto space-y-4 text-sm bg-slate-50">
+                <!-- Detalhes do modal serão inseridos aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DADOS DA VIAGEM ---
+            const itineraryData = [
+                { date: "2025-08-05", dayOfWeek: "Terça-feira", title: "Chegada e Acomodação", icon: "plane", schedule: [ { type: 'flight', flightNumber: 'G3 7486', departure: { time: '09:40', airport: 'Guarulhos (GRU)' }, arrival: { time: '13:30', airport: 'Mendoza (MDZ)' } }, { time: "14:00", event: "Retirar Carro na locadora", modalId: 'pickupInfo' }, { time: "15:00", event: "Check-in no AirBnb", modalId: 'airbnbInfo' }, { time: "16:00", event: "Sacar dinheiro na Western Union", modalId: 'westernUnionInfo' }, { time: "16:30", event: "Compras de mantimentos para Las Leñas", modalId: 'supermarketInfo' }, { time: "20:00", event: "Jantar", modalId: 'dinnerSuggestions' } ], costs: [ { item: "Estadia (05 a 06/08)", amount: 181.29, paidBy: "Eduardo", status: "Pago" }, { item: "Supermercado (mantimentos p/ Las Leñas)", amount: 600.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "Bem-vindos a Mendoza!", text: "Seu Airbnb está localizado na região central, um excelente ponto de partida para explorar a cidade. A área é conhecida por sua arborização e tranquilidade. A poucos minutos de carro, vocês encontrarão o imenso **Parque General San Martín**, o pulmão verde da cidade, perfeito para uma caminhada. O coração da cidade, a **Plaza Independencia**, também está próxima, cercada por edifícios históricos, museus e cafés. Mendoza foi reconstruída após um grande terremoto em 1861, e sua arquitetura moderna se mistura com o charme das praças e da cultura do vinho que permeia toda a região." } },
+                { date: "2025-08-06", dayOfWeek: "Quarta-feira", title: "Viagem para Los Molles", icon: "mountain-snow", schedule: [ { time: "09:30", event: "Saída de Mendoza (F. N. Laprida 193)" }, { time: "~12:00", event: "Paradas na Ruta 222", modalId: 'roadtripStops'}, { time: "14:00", event: "Chegada e Check-in em Los Molles", modalId: 'airbnbLasLenasInfo' }, { time: "20:00", event: "Jantar em Los Molles", modalId: 'dinnerSuggestionsLasLenas'} ], costs: [ { item: "Estadia em Los Molles (06 a 09/08)", amount: 2341.35, paidBy: "Eduardo", status: "Pago" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "A Jornada até a Cordilheira", text: "Hoje o dia é dedicado à espetacular viagem de Mendoza até o pequeno vilarejo de montanha de **Los Molles**. A distância é de aproximadamente **370 km**, uma viagem de cerca de 4 a 5 horas pela famosa **Ruta 40** e depois pela cênica **Ruta Provincial 222**. Los Molles é um vilarejo charmoso que serve como base para a estação de esqui de Las Leñas, oferecendo uma experiência mais tranquila e autêntica da vida na Cordilheira dos Andes.", mapUrl: "https://www.google.com/maps/dir/F.+N.+Laprida+193,+Mendoza,+Argentina/Pozo+de+las+Ánimas,+Mendoza,+Argentina/Laguna+de+la+Niña+Encantada,+Mendoza,+Argentina/Ruta+Provincial+222+Km+30,+Los+Molles,+Mendoza,+Argentina/" } },
+                { date: "2025-08-07", dayOfWeek: "Quinta-feira", title: "Dia de Ski (Iniciantes)", icon: "person-standing", schedule: [ { time: "08:00", event: "Las Leñas (Meio-dia em pista de principiantes)" } ], liveCam: { title: "Las Leñas Ao Vivo", url: "https://tv.streamcasthd.com/live-stream-video-widget/laslenas" }, costs: [ { item: "Acesso Pista Iniciantes", amount: 346.84, paidBy: "Dividido", status: "Não Pago" }, { item: "Equipamentos de Ski", amount: 543.72, paidBy: "Dividido", status: "Não Pago" }, { item: "Capacete", amount: 115.00, paidBy: "Dividido", status: "Não Pago" }, { item: "Aula de Ski", amount: 700.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "Conhecendo Las Leñas", text: "**Las Leñas** é um dos centros de esqui mais importantes da América do Sul, localizado no coração da Cordilheira dos Andes. Inaugurado em 1983, o vale é famoso por sua neve em pó de alta qualidade e por oferecer pistas para todos os níveis, desde iniciantes até esquiadores de nível mundial que buscam desafios fora de pista. Com uma base a 2.240 metros de altitude e um cume que chega a 3.430 metros, a paisagem é simplesmente espetacular. Uma curiosidade é que o nome 'Las Leñas' vem de um arbusto amarelado comum na região, usado como lenha pelos povos nativos." } },
+                { date: "2025-08-08", dayOfWeek: "Sexta-feira", title: "Dia de Ski (Acesso Amplo)", icon: "person-standing", schedule: [ { time: "08:00", event: "Las Leñas (Meio-dia com acesso mais amplo)" }, { time: "16:00", event: "Pós-ski e Jantar", modalId: 'dinnerSuggestionsLasLenasFull'} ], liveCam: { title: "Las Leñas Ao Vivo", url: "https://tv.streamcasthd.com/live-stream-video-widget/laslenas" }, costs: [ { item: "Acesso Pista Ampla", amount: 938.40, paidBy: "Dividido", status: "Não Pago" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "Aventura e Gastronomia na Montanha", text: "Após um dia intenso nas pistas, a experiência em Las Leñas continua. A cultura do *pós-ski* é forte aqui, com bares e restaurantes na base da montanha que se tornam pontos de encontro animados. É a oportunidade perfeita para relaxar, compartilhar as experiências do dia e se preparar para um jantar delicioso. A gastronomia local é marcada por pratos robustos como o *chivo* (cabrito) e a truta, perfeitamente harmonizados com os vinhos de Mendoza. Não deixe de provar as empanadas mendocinas, famosas por seu recheio suculento." } },
+                { date: "2025-08-09", dayOfWeek: "Sábado", title: "Retorno para Mendoza", icon: "car", schedule: [ { time: "09:00", event: "Saída de Los Molles" }, { time: "14:00", event: "Chegada e Check-in em Mendoza", modalId: 'airbnbInfo2' }, { time: "16:00", event: "Tarde e noite livres", modalId: 'mendozaLeisure' } ], costs: [ { item: "Estadia em Mendoza (09 a 15/08)", amount: 1388.41, paidBy: "Eduardo", status: "Pago" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "De volta à Cidade do Sol e do Bom Vinho", text: "A viagem de volta de Los Molles para Mendoza oferece uma nova perspectiva das paisagens andinas. A **Ruta 40**, uma das estradas mais longas e famosas do mundo, acompanha a Cordilheira e revela cenários desérticos e vinhedos que se estendem pelo horizonte. Ao chegar em Mendoza, aproveitem para sentir o ritmo da cidade. Uma curiosidade é o sistema de *acequias*, canais de irrigação que correm ao lado das ruas, uma herança dos povos Huarpes e fundamental para manter a cidade tão verdejante em meio a uma região árida.", mapUrl: "https://www.google.com/maps/dir/Ruta+Provincial+222+Km+30,+Los+Molles,+Mendoza,+Argentina/Martínez+de+Rozas+1165,+Mendoza,+Argentina/" } },
+                { date: "2025-08-10", dayOfWeek: "Domingo", title: "Passeio ao Aconcágua", icon: "mountain", schedule: [ { time: "09:00", event: "Início da Rota das Montanhas" }, { time: "12:00", event: "Passeio no Parque Aconcágua" } ], travelInfo: { distance: "185 km", time: "Aprox. 3h" }, mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Parque+Provincial+Aconcagua,+Ruta+Nacional+7,+Mendoza,+Argentina/", costs: [ { item: "Gastos do dia (ingressos, etc)", amount: 300.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "Rumo ao Teto das Américas", text: "Preparem-se para um dos passeios mais espetaculares da Argentina! A viagem até o Parque Provincial Aconcágua é uma atração por si só, seguindo a famosa **Ruta Nacional 7**, que serpenteia pelos Andes em direção à fronteira com o Chile.", curiosities: { isScenic: true, title: "Curiosidades e Dicas do Caminho", items: [ { title: "A Estrada dos Caracoles", text: "Parte da rota para o Chile, logo após a fronteira, é famosa por suas curvas extremamente sinuosas. Embora vocês não precisem passar por ela para chegar ao parque, a estrada que leva até lá já oferece paisagens impressionantes e mirantes espetaculares." }, { title: "Puente del Inca", text: "Uma parada obrigatória! É uma formação rochosa natural que cria uma ponte sobre o Rio Cuevas. Suas cores vibrantes vêm dos minerais das águas termais que brotam no local. Antigamente, havia um hotel de luxo ali, cujas ruínas ainda podem ser vistas." }, { title: "Mirador del Aconcagua", text: "Dentro do parque, uma caminhada leve de cerca de 40 minutos leva ao principal mirante, de onde se tem uma vista frontal e deslumbrante do Monte Aconcágua, o pico mais alto fora da Ásia, com 6.962 metros de altitude." }, { title: "Fauna Andina", text: "Fiquem atentos pelo caminho! É comum avistar condores sobrevoando os picos, além de guanacos e lebres selvagens nas encostas das montanhas." }, { title: "Estrada de Ferro Transandina", text: "Ao longo da Ruta 7, vocês verão trechos e estações abandonadas da antiga Estrada de Ferro Transandina, que ligava a Argentina ao Chile. É um vislumbre fascinante da história da engenharia do século XX." } ], externalLink: { text: "Saiba mais sobre o Parque Aconcágua", url: "https://www.mendoza.gov.ar/aconcagua/" } } } },
+                { date: "2025-08-11", dayOfWeek: "Segunda-feira", title: "Termas e Devolução do Carro", icon: "bath", schedule: [ { time: "10:00", event: "Passeio Hotel Spa Thermas Cacheuta" }, { time: "15:30", event: "Visita a Potrerillos" }, { time: "16:30", event: "Visita a El Salto (se possível)" }, { time: "19:30", event: "Devolver o carro na locadora", modalId: 'dropoffInfo' } ], travelInfo: { distance: "38 km", time: "Aprox. 1h" }, mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Hotel+%26+Spa+Termas+Cacheuta,+Ruta+Provincial+82+Km+38,+Cacheuta,+Mendoza,+Argentina/", costs: [ { item: "Passeio Termas (com almoço)", amount: 840.00, paidBy: "Eduardo", status: "Pago" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "Relaxamento e Paisagens", text: "O dia de hoje é para relaxar nas águas termais de Cacheuta e apreciar as paisagens deslumbrantes da pré-cordilheira, incluindo a represa de Potrerillos.", curiosities: { isScenic: true, title: "Curiosidades e Dicas do Dia", items: [ { title: "Águas Terapêuticas", text: "As águas das Termas de Cacheuta são ricas em minerais e brotam da terra a temperaturas que variam de 35°C a 50°C. Acredita-se que tenham propriedades terapêuticas, ideais para relaxar os músculos após dias de ski." }, { title: "A Represa de Potrerillos", text: "A impressionante represa que vocês visitarão foi inaugurada em 2001 e é fundamental para o controle de enchentes, irrigação e geração de energia para Mendoza. Suas águas de cor esmeralda criam um cenário espetacular para fotos." }, { title: "Túneis da Antiga Rota", text: "O caminho para Cacheuta pela Ruta Provincial 82 passa por túneis escavados na rocha que faziam parte do antigo traçado da ferrovia transandina. A rota é cênica e acompanha o curso do Rio Mendoza." } ], externalLink: { text: "Explore as Termas de Cacheuta", url: "https://termascacheuta.com/" } } } },
+                { date: "2025-08-12", dayOfWeek: "Terça-feira", title: "Vinícolas (Dia 1)", icon: "wine", schedule: [ { time: "08:30", event: "Saída para Maipú & Luján de Cuyo" }, { time: "09:00", event: "Casa Vigil (El Enemigo) - Visita e degustação" }, { time: "12:30", event: "Bodega Norton - Almoço harmonizado 6 passos" }, { time: "16:00", event: "Bodega Trapiche - Degustação" }, { time: "17:00", event: "Retorno" } ], travelInfo: { mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Casa+Vigil+-+El+Enemigo,+Videla+Aranda+7008,+Maip%C3%BA,+Mendoza,+Argentina/Bodega+Norton,+Ruta+Provincial+15,+Luj%C3%A1n+de+Cuyo,+Mendoza,+Argentina/Bodega+Trapiche,+C.+Nueva+Mayorga,+Maip%C3%BA,+Mendoza,+Argentina/", legs: [ { from: "Airbnb", to: "Casa Vigil", distance: "20 km", time: "~25 min", mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Casa+Vigil+-+El+Enemigo,+Videla+Aranda+7008,+M5586+Maip%C3%BA,+Mendoza,+Argentina/" }, { from: "Casa Vigil", to: "Bodega Norton", distance: "23 km", time: "~30 min", mapUrl: "https://www.google.com/maps/dir/Casa+Vigil+-+El+Enemigo,+Videla+Aranda+7008,+Maip%C3%BA,+Mendoza,+Argentina/Bodega+Norton,+Ruta+Provincial+15,+Luj%C3%A1n+de+Cuyo,+Mendoza,+Argentina/" }, { from: "Bodega Norton", to: "Bodega Trapiche", distance: "13 km", time: "~20 min", mapUrl: "https://www.google.com/maps/dir/Bodega+Norton,+Ruta+Provincial+15,+Luj%C3%A1n+de+Cuyo,+Mendoza,+Argentina/Bodega+Trapiche,+C.+Nueva+Mayorga,+Maip%C3%BA,+Mendoza,+Argentina/" } ] }, costs: [ { item: "Transfer Vinícolas (2 dias)", amount: 1200.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Casa Vigil", amount: 440.00, paidBy: "Dividido", status: "Reservado" }, { item: "Bodega Norton (almoço)", amount: 1100.00, paidBy: "Dividido", status: "Reservado" }, { item: "Bodega Trapiche", amount: 440.00, paidBy: "Dividido", status: "Não Reservado" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "O Berço do Malbec", text: "Hoje o roteiro explora duas das regiões vinícolas mais tradicionais de Mendoza: **Maipú** e **Luján de Cuyo**. Luján de Cuyo foi a primeira região a obter a Denominação de Origem Controlada (DOC) para o Malbec na Argentina, um selo que garante a qualidade e as características únicas do vinho local.", curiosities: { isScenic: true }, wineries: [ { name: "Casa Vigil (El Enemigo)", history: "Criada pelo renomado enólogo Alejandro Vigil, a vinícola é inspirada na Divina Comédia de Dante Alighieri. Cada espaço representa o paraíso, o purgatório e o inferno. É uma experiência enoturística que une vinho, arte e gastronomia de forma única.", website: "https://casavigil.com/" }, { name: "Bodega Norton", history: "Fundada em 1895 por Sir Edmund James Palmer Norton, um engenheiro inglês, a Norton é uma das vinícolas mais antigas e prestigiadas de Luján de Cuyo. Possui vinhedos centenários e combina tradição com tecnologia de ponta.", website: "https://www.norton.com.ar/" }, { name: "Bodega Trapiche", history: "Com mais de 130 anos de história, a Trapiche é uma das marcas argentinas mais conhecidas no mundo. O edifício da vinícola, de estilo florentino e construído em 1912, é um ícone arquitetônico da região e foi totalmente restaurado.", website: "https://www.trapiche.com.ar/" } ] } },
+                { date: "2025-08-13", dayOfWeek: "Quarta-feira", title: "Vinícolas (Dia 2)", icon: "grape", schedule: [ { time: "08:30", event: "Saída para o Vale do Uco" }, { time: "09:30", event: "Bodega Zuccardi - Degustação Lugar Y Gente" }, { time: "12:30", event: "Bodega La Azul - Almoço 3 passos com vinho" }, { time: "15:00", event: "Bodega Zorzal - Degustação de Malbecs" }, { time: "16:30", event: "Retorno" } ], travelInfo: { mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Zuccardi+Valle+de+Uco,+Ruta+Provincial+94,+Tunuy%C3%A1n,+Mendoza,+Argentina/Bodega+La+Azul,+Ruta+Provincial+89,+Tupungato,+Mendoza,+Argentina/Bodega+Zorzal,+RP89,+Tupungato,+Mendoza,+Argentina/", legs: [ { from: "Airbnb", to: "Bodega Zuccardi", distance: "115 km", time: "~1h 30min", mapUrl: "https://www.google.com/maps/dir/Mart%C3%ADnez+de+Rozas+1165,+Mendoza,+Argentina/Zuccardi+Valle+de+Uco,+Ruta+Provincial+94,+Tunuy%C3%A1n,+Mendoza,+Argentina/" }, { from: "Zuccardi", to: "Bodega La Azul", distance: "25 km", time: "~25 min", mapUrl: "https://www.google.com/maps/dir/Zuccardi+Valle+de+Uco,+Ruta+Provincial+94,+Tunuy%C3%A1n,+Mendoza,+Argentina/Bodega+La+Azul,+Ruta+Provincial+89,+Tupungato,+Mendoza,+Argentina/" }, { from: "La Azul", to: "Bodega Zorzal", distance: "13 km", time: "~15 min", mapUrl: "https://www.google.com/maps/dir/Bodega+La+Azul,+Ruta+Provincial+89,+Tupungato,+Mendoza,+Argentina/Bodega+Zorzal,+RP89,+Tupungato,+Mendoza,+Argentina/" } ] }, costs: [ { item: "Bodega Zuccardi", amount: 600.00, paidBy: "Dividido", status: "Reservado" }, { item: "Bodega La Azul (almoço)", amount: 670.00, paidBy: "Dividido", status: "Reservado" }, { item: "Bodega Zorzal", amount: 620.00, paidBy: "Dividido", status: "Não Reservado" }, { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "A Nova Fronteira do Vinho", text: "O **Vale de Uco** é a região vinícola mais moderna e promissora de Mendoza. Localizado a uma altitude mais elevada, aos pés da Cordilheira, seus vinhos são conhecidos pela intensidade de cor, frescor e elegância. A arquitetura das vinícolas aqui é um show à parte.", curiosities: { isScenic: true }, wineries: [ { name: "Bodega Zuccardi", history: "Eleita a melhor vinícola do mundo por vários anos consecutivos, a Zuccardi Valle de Uco é um projeto de Sebastián Zuccardi. Sua arquitetura impressionante foi projetada para se integrar à paisagem, utilizando materiais locais. O foco é expressar o terroir único de cada vinhedo.", website: "https://www.zuccardiwines.com/" }, { name: "Bodega La Azul", history: "É uma pequena vinícola familiar que se destaca pela hospitalidade e pelo ambiente descontraído. Começou como um projeto de amigos e hoje é famosa por seu restaurante, que oferece uma autêntica experiência gastronômica local com vinhos excelentes e uma vista espetacular.", website: "https://laazul.com/" }, { name: "Bodega Zorzal", history: "Liderada pelos irmãos Michelini, a Zorzal é conhecida por sua abordagem inovadora e vinhos de vanguarda. Eles são pioneiros na fermentação em ovos de concreto e buscam criar vinhos com mínima intervenção, que reflitam a pureza e a mineralidade do terroir de Gualtallary.", website: "https://zorzalwines.com/" } ] } },
+                { date: "2025-08-14", dayOfWeek: "Quinta-feira", title: "Dia Livre em Mendoza", icon: "compass", isFreeDayPlanner: true, costs: [ { item: "Café da Manhã (estimativa 2p)", amount: 120.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Almoço (estimativa 2p)", amount: 180.00, paidBy: "Dividido", status: "Estimativa" }, { item: "Jantar (estimativa 2p)", amount: 160.00, paidBy: "Dividido", status: "Estimativa" } ], daySummary: { title: "✨ Planeje seu Dia Livre!", text: "Não sabe o que fazer? Deixe nossa inteligência artificial criar um roteiro personalizado para vocês! Escolha um estilo de viagem abaixo e descubra novas possibilidades em Mendoza." } },
+                { date: "2025-08-15", dayOfWeek: "Sexta-feira", title: "Despedida e Retorno", icon: "send", schedule: [ { type: 'flight', flightNumber: 'G3 7487', departure: { time: '14:20', airport: 'Mendoza (MDZ)' }, arrival: { time: '17:30', airport: 'Guarulhos (GRU)' } }, { type: 'flight', flightNumber: 'G3 2062', departure: { time: '23:05', airport: 'Guarulhos (GRU)' }, arrival: { time: '00:25', airport: 'Confins (CNF)', note: '+1 dia' } } ], costs: [] }
+            ];
+            
+            const modalData = {
+                financialSummary: {
+                    title: "Resumo Financeiro",
+                    content: () => {
+                        const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+                        const preTripCosts = [
+                            { item: "Passagens Aéreas", amount: 1029.00, paidBy: "Gabi" },
+                            { item: "Aluguel de Carro", amount: 1783.71, paidBy: "Eduardo" },
+                            { item: "Gasolina Estimada", amount: 600.00, paidBy: "Eduardo" },
+                            { item: "Estadia 05/08 a 06/08", amount: 181.29, paidBy: "Eduardo" },
+                            { item: "Estadia Las Leñas 06/08 a 09/08", amount: 2341.35, paidBy: "Eduardo" },
+                            { item: "Estadia Mendoza 09/08 a 15/08", amount: 1388.41, paidBy: "Eduardo" },
+                            { item: "Transfer Vinícolas 2 dias", amount: 1200.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const skiCosts = [
+                            { item: "Dia 07/08: Pista de principiantes", amount: 346.84, paidBy: "Eduardo e Gabi" },
+                            { item: "Dia 08/08: Acesso mais amplo", amount: 938.40, paidBy: "Eduardo e Gabi" },
+                            { item: "Equipamentos Ski", amount: 543.72, paidBy: "Eduardo e Gabi" },
+                            { item: "Capacete", amount: 115.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Aula de Ski (estimativa)", amount: 700.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const wineryCosts = [
+                            { item: "Casa Vigil - El Enemigo", amount: 440.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Bodega Norton - Almoço 6 passos", amount: 1100.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Bodega Trapiche", amount: 440.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Bodega Zucardi - Degustação", amount: 600.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Almoço Bodega La Azul", amount: 670.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Bodega Zorzal - Degustação", amount: 620.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const spaCosts = [
+                            { item: "Hotel Spa Thermas Cacheuta", amount: 840.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const aconcaguaCosts = [
+                            { item: "Gastos do dia (ingressos, etc)", amount: 300.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const miscCosts = [
+                            { item: "Cafés (9 manhãs)", amount: 1080.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Almoço (7 tardes)", amount: 1260.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Jantar (10 noites)", amount: 1600.00, paidBy: "Eduardo e Gabi" },
+                            { item: "Supermercado", amount: 600.00, paidBy: "Eduardo e Gabi" },
+                        ];
+
+                        const categoryIcons = {
+                            'Pré-Viagem': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plane"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1.5-1.5-3-1-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>`,
+                            'Ski': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mountain-snow"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2.19 8.23.19"/></svg>`,
+                            'Vinícolas': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wine"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg>`,
+                            'Spa': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bath"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-2.12 0L3 4.88a1.5 1.5 0 0 0 0 2.12L5.5 9"/><path d="M12.5 2.5a1.5 1.5 0 0 0-2.12 0L9 4.88a1.5 1.5 0 0 0 0 2.12l2.5 2.5"/><path d="M18 14h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2"/><path d="M22 18v-2a2 2 0 0 0-2-2h-2"/><path d="m2 12 1 1v5c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-5l1-1"/><path d="M12 12H4v8h16v-8h-8Z"/></svg>`,
+                            'Aconcágua': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mountain"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>`,
+                            'Diversos': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`,
+                        };
+                        
+                        const costSection = (title, costs) => {
+                            const subtotal = costs.reduce((acc, cost) => acc + cost.amount, 0);
+                            return `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                                    <h4 class="font-semibold text-slate-900 flex items-center space-x-2 mb-3">
+                                        <span class="text-purple-600">${categoryIcons[title]}</span>
+                                        <span>${title}</span>
+                                    </h4>
+                                    <div class="space-y-3 text-xs">
+                                        ${costs.map(cost => `
+                                            <div class="flex justify-between items-center text-slate-600">
+                                                <div>
+                                                    <p>${cost.item}</p>
+                                                    <p class="text-slate-400">(${cost.paidBy})</p>
+                                                </div>
+                                                <span class="font-medium text-slate-800">${formatCurrency(cost.amount)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="border-t border-slate-200 mt-3 pt-3 flex justify-between items-center">
+                                        <span class="font-semibold text-slate-700">Subtotal</span>
+                                        <span class="font-bold text-slate-900">${formatCurrency(subtotal)}</span>
+                                    </div>
+                                </div>
+                            `;
+                        };
+
+                        const totalGabi = 7725.98;
+                        const totalEduardo = 12991.74;
+                        const totalTrip = 20117.72;
+
+                        return `
+                            <div class="bg-purple-50 p-4 rounded-xl text-center mb-6 border border-purple-200">
+                                <p class="text-sm text-purple-800 font-medium">Custo Total Estimado</p>
+                                <p class="text-4xl font-bold text-purple-900 my-1">${formatCurrency(totalTrip)}</p>
+                                <div class="flex justify-around text-center mt-3 pt-3 border-t border-purple-200">
+                                    <div>
+                                        <p class="font-bold text-lg text-blue-800">${formatCurrency(totalGabi)}</p>
+                                        <p class="text-xs text-blue-600">Gabi (~${((totalGabi/totalTrip)*100).toFixed(1)}%)</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-lg text-green-800">${formatCurrency(totalEduardo)}</p>
+                                        <p class="text-xs text-green-600">Eduardo (~${((totalEduardo/totalTrip)*100).toFixed(1)}%)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${costSection("Pré-Viagem", preTripCosts)}
+                            ${costSection("Ski", skiCosts)}
+                            ${costSection("Vinícolas", wineryCosts)}
+                            <div class="bg-yellow-100 text-yellow-800 text-xs p-3 rounded-lg -mt-2 mb-4 border border-yellow-200">
+                                <strong>OBS:</strong> Bodega Zorzal e Bodega Trapiche ainda não estão reservados.
+                            </div>
+                            ${costSection("Spa", spaCosts)}
+                            ${costSection("Aconcágua", aconcaguaCosts)}
+                            ${costSection("Diversos", miscCosts)}
+                        `;
+                    }
+                },
+                pickupInfo: { title: "Informações de Retirada do Carro", content: () => { const details = [ { label: "Data e Hora", value: "05 de Ago. 2025 às 14:00" }, { label: "Local", value: "Aeroporto de Mendoza, MDZ, Argentina" }, { label: "Tipo de Serviço", value: "Balcão de Atendimento no Aeroporto" } ]; return `<div class="space-y-3">${details.map(d => `<div class="border-b border-gray-100 pb-2"><p class="text-xs text-gray-500">${d.label}</p><p class="text-gray-800">${d.value}</p></div>`).join('')}</div> <button data-modal-id="rentalVoucher" class="modal-trigger-btn mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">Visualizar Voucher</button>`; } },
+                dropoffInfo: { title: "Informações de Devolução do Carro", content: () => { const details = [ { label: "Data e Hora", value: "11 de Ago. 2025 às 19:30" }, { label: "Duração", value: "7 dias" }, { label: "Local", value: "Aeroporto de Mendoza, MDZ, Argentina" }, { label: "Tipo de Serviço", value: "Balcão de Atendimento no Aeroporto" } ]; return `<div class="space-y-3">${details.map(d => `<div class="border-b border-gray-100 pb-2"><p class="text-xs text-gray-500">${d.label}</p><p class="text-gray-800">${d.value}</p></div>`).join('')}</div>`; } },
+                rentalVoucher: { title: "Voucher da Reserva - Hertz", content: () => { return ` <div class="text-center mb-4"> <h3 class="font-bold text-lg">VOUCHER - DOCUMENTO DA RESERVA</h3> <p class="text-sm text-gray-600">Condutor: Eduardo Ferraz</p> </div> <div class="grid grid-cols-2 gap-4 mb-4"> <div class="bg-gray-100 p-3 rounded-lg text-center"> <p class="text-xs text-gray-500">Reserva Rentcars</p> <p class="font-bold text-lg text-gray-800">ADLZ5LW</p> </div> <div class="bg-gray-100 p-3 rounded-lg text-center"> <p class="text-xs text-gray-500">Voucher / Cód. Retirada</p> <p class="font-bold text-lg text-gray-800">1313380</p> </div> </div> <div class="border-t border-gray-200 pt-4"> <h4 class="font-semibold text-gray-800 mb-2">Detalhes da Locação</h4> <p><strong>Locadora:</strong> Hertz Rent a Car</p> <p><strong>Veículo:</strong> Fiat Cronos (ou similar) - Standard</p> <p><strong>Caução de Garantia:</strong> A partir de <strong>ARS 600.000,00</strong></p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Retirada e Devolução</h4> <p><strong>Retirada:</strong> 05 Ago, 2025 - 14:00</p> <p><strong>Devolução:</strong> 11 Ago, 2025 - 19:30</p> <p><strong>Local:</strong> Aeropuerto Internacional de Mendoza (MDZ), Ruta Nacional Nº 40 Acceso Norte Km. 15, Mendoza, Argentina</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Proteções</h4> <ul class="list-disc list-inside space-y-1 text-gray-600 text-xs"> <li><strong>Proteção do Veículo:</strong> Contra danos e avarias.</li> <li><strong>Proteção Contra Roubo:</strong> Proteção contra roubo do veículo.</li> <li><strong>Proteção Contra Terceiros:</strong> Cobertura para danos materiais e pessoais.</li> </ul> </div> <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mt-4"> <h4 class="font-semibold text-yellow-800 mb-2">Requisitos Essenciais para Retirada</h4> <ul class="list-disc list-inside space-y-1 text-yellow-700"> <li><strong>CNH</strong> original, válida e em nome do condutor.</li> <li><strong>Passaporte</strong> válido.</li> <li><strong>Cartão de crédito internacional</strong> físico com titularidade do condutor e limite para caução.</li> </ul> <p class="text-xs text-yellow-600 mt-2">Cartões pré-pagos, virtuais ou de bancos digitais podem não ser aceitos.</p> </div> `; } },
+                airbnbInfo: { title: "Reserva - Mystical wine apartment", content: () => { return ` <img src="https://placehold.co/600x400/D1C7B8/FFFFFF?text=Mystical+wine+apartment" alt="Foto do apartamento em Mendoza" class="rounded-lg mb-4"> <div class="bg-gray-100 p-3 rounded-lg text-center mb-4"> <p class="text-xs text-gray-500">Código de Confirmação Airbnb</p> <p class="font-bold text-lg text-gray-800 tracking-widest">HMYWPK5PQ9</p> </div> <div class="border-t border-gray-200 pt-4"> <h4 class="font-semibold text-gray-800 mb-2">Check-in / Checkout</h4> <p><strong>Check-in:</strong> Terça, 05 de Ago. - a partir das 15:00</p> <p><strong>Checkout:</strong> Quarta, 06 de Ago. - até 11:00</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Endereço</h4> <p>F. N. Laprida 193, M5500</p> <p>Mendoza, Argentina</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Anfitrião</h4> <p>Luffo (Néstor zuccatto)</p> <p class="text-xs text-gray-500 mt-1">Entre em contato com o anfitrião para combinar o check-in.</p> </div> `; } },
+                westernUnionInfo: { title: "Western Union Mais Próxima", content: () => { return ` <div class="border-b border-gray-100 pb-3 mb-3"> <h4 class="font-semibold text-gray-800 mb-1">Western Union / Pago Fácil</h4> <p class="text-gray-600">Av. Colón 324, M5500, Mendoza</p> <p class="text-xs text-gray-500 mt-1">Aprox. 1.5 km do Airbnb (5 min de carro)</p> <a href="https://www.google.com/maps/search/?api=1&query=Western+Union,Av.+Colón+324,Mendoza,Argentina" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold">Ver no mapa</a> </div> <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mt-4"> <p class="text-sm text-yellow-700"><strong>Atenção:</strong> Recomenda-se verificar o horário de funcionamento no Google Maps antes de ir.</p> </div> `; } },
+                supermarketInfo: { title: "Sugestões de Supermercados", content: () => { return ` <p class="mb-4">Para comprar os mantimentos para Las Leñas, aqui estão duas grandes redes próximas:</p> <div class="border-b border-gray-100 pb-3 mb-3"> <h4 class="font-semibold text-gray-800 mb-1">Carrefour</h4> <p class="text-gray-600">Av. Gral. Las Heras 400, M5500, Mendoza</p> <p class="text-xs text-gray-500 mt-1">Aprox. 1.2 km do Airbnb (4 min de carro)</p> <a href="https://www.google.com/maps/search/?api=1&query=Carrefour,Av.+Gral.+Las+Heras+400,Mendoza,Argentina" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold">Ver no mapa</a> </div> <div> <h4 class="font-semibold text-gray-800 mb-1">Vea</h4> <p class="text-gray-600">Av. Colón 540, M5500, Mendoza</p> <p class="text-xs text-gray-500 mt-1">Aprox. 1.7 km do Airbnb (6 min de carro)</p> <a href="https://www.google.com/maps/search/?api=1&query=Vea,Av.+Colón+540,Mendoza,Argentina" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold">Ver no mapa</a> </div> `; } },
+                dinnerSuggestions: { title: "Sugestões para o Jantar", content: () => { const restaurants = [ { name: "Azafrán Restó", description: "Cozinha argentina contemporânea, com estrela Michelin. Ideal para uma noite especial.", distance: "Aprox. 1.4 km", link: "https://www.instagram.com/azafranresto" }, { name: "Anna Bistró", description: "Ambiente charmoso e um menu variado que vai da cozinha francesa à regional.", distance: "Aprox. 650 m", link: "https://annabistro.com.ar/" }, { name: "Maria Antonieta", description: "Local moderno e descontraído, perfeito para pratos frescos e um bom vinho.", distance: "Aprox. 1.8 km", link: "https://www.instagram.com/mariaantonietaresto" } ]; return ` ${restaurants.map(r => ` <div class="border-b border-gray-100 pb-3 mb-3"> <div class="flex justify-between items-start"> <div> <h4 class="font-semibold text-gray-800">${r.name}</h4> <p class="text-gray-600">${r.description}</p> <p class="text-xs text-gray-500 mt-1">${r.distance} do Airbnb</p> </div> <a href="${r.link}" target="_blank" class="ml-4 flex-shrink-0 text-xs bg-blue-500 text-white font-semibold px-2 py-1 rounded-md hover:bg-blue-600 transition-colors">Visitar</a> </div> </div> `).join('')} `; } },
+                airbnbLasLenasInfo: { title: "Reserva - La Valtelina | Monoambiente", content: () => { return ` <img src="https://placehold.co/600x400/7A6F64/FFFFFF?text=La+Valtelina" alt="Foto do apartamento em Los Molles" class="rounded-lg mb-4"> <div class="bg-gray-100 p-3 rounded-lg text-center mb-4"> <p class="text-xs text-gray-500">Código de Confirmação Airbnb</p> <p class="font-bold text-lg text-gray-800 tracking-widest">HMYRP34CXQ</p> </div> <div class="border-t border-gray-200 pt-4"> <h4 class="font-semibold text-gray-800 mb-2">Check-in / Checkout</h4> <p><strong>Check-in:</strong> Quarta, 06 de Ago. - a partir das 14:00</p> <p><strong>Checkout:</strong> Sábado, 09 de Ago. - até 11:00</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Endereço</h4> <p>Ruta Provincial 222 Km 30</p> <p>Los Molles, Malargüe, Mendoza, Argentina</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Anfitrião</h4> <p>Estadía</p> <p class="text-xs text-gray-500 mt-1">O anfitrião recebe você pessoalmente para o check-in.</p> </div> `; } },
+                dinnerSuggestionsLasLenasFull: { title: "Onde Jantar na Região", content: () => { const restaurants = [ { name: "UFO Point", location: "Las Leñas", description: "Famoso pós-ski na base da montanha, com música, drinks e um ambiente super animado.", link: "https://www.instagram.com/ufopoint/" }, { name: "El Brasero", location: "Las Leñas", description: "Clássica parrilla argentina para quem busca carnes de alta qualidade e um ambiente de montanha.", link: "https://www.instagram.com/laslenasresort/" }, { name: "Corral de la Piedra", location: "Las Leñas", description: "Oferece pratos regionais e fondues, perfeito para uma noite fria na montanha.", link: "https://www.instagram.com/corraldelapiedra/" }, { name: "La Cima Restaurant", location: "Las Leñas", description: "Gastronomia mais elaborada com uma vista espetacular do vale. Ótima carta de vinhos.", link: "https://www.instagram.com/laslenasresort/" }, { name: "Restaurant Los Molles", location: "Los Molles", description: "Cozinha regional com sabores da cordilheira, especializado em truta e chivo (cabrito).", link: "https://www.complejolosmolles.com/restaurant" }, { name: "Parrilla El Montañes", location: "Los Molles", description: "Típica parrilla argentina de campo, com carnes na brasa e ambiente rústico.", link: "https://www.instagram.com/parrillaelmontanes_" }, { name: "El Rincón de la Empanada", location: "Los Molles", description: "Opção mais casual para provar as autênticas e deliciosas empanadas mendocinas.", link: "https://www.instagram.com/elrincondelaempanada.malargue/" } ]; return ` ${restaurants.map(r => ` <div class="border-b border-gray-100 pb-3 mb-3"> <div class="flex justify-between items-start"> <div> <h4 class="font-semibold text-gray-800">${r.name} <span class="text-xs font-normal text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">${r.location}</span></h4> <p class="text-gray-600">${r.description}</p> </div> <a href="${r.link}" target="_blank" class="ml-4 flex-shrink-0 text-xs bg-blue-500 text-white font-semibold px-2 py-1 rounded-md hover:bg-blue-600 transition-colors">Visitar</a> </div> </div> `).join('')} `; } },
+                roadtripStops: { title: "Paradas na Ruta Provincial 222", content: () => { return ` <p class="mb-4">A viagem até Los Molles é um espetáculo. Aproveitem para parar e apreciar as paisagens únicas:</p> <div class="border-b border-gray-100 pb-3 mb-3"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pozo_de_las_Animas_-_Mendoza_-_Argentina.jpg/1280px-Pozo_de_las_Animas_-_Mendoza_-_Argentina.jpg" alt="Foto do Pozo de las Ánimas" class="rounded-lg mb-2" onerror="this.onerror=null;this.src='https://placehold.co/600x400/A98664/FFFFFF?text=Pozo+de+las+Ánimas';"> <h4 class="font-semibold text-gray-800">Pozo de las Ánimas</h4> <p class="text-gray-600">Duas grandes dolinas (depressões no solo) com água azul-turquesa, formadas pela dissolução de rochas subterrâneas. A lenda local diz que são os olhos de um deus chorando por um amor perdido.</p> </div> <div> <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Laguna_de_la_Ni%C3%B1a_Encantada.jpg" alt="Foto da Laguna de la Niña Encantada" class="rounded-lg mb-2" onerror="this.onerror=null;this.src='https://placehold.co/600x400/6B8A99/FFFFFF?text=Laguna+de+la+Niña+Encantada';"> <h4 class="font-semibold text-gray-800">Laguna de la Niña Encantada</h4> <p class="text-gray-600">Uma lagoa de águas cristalinas e calmas, cercada por rochas vulcânicas. Diz a lenda que uma princesa indígena se afogou ali e seu espírito encanta as águas até hoje.</p> <a href="https://www.welcomeargentina.com/malargue/poco-animas-laguna-nina-encantada.html" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold mt-2 inline-block">Saber mais</a> </div> `; } },
+                airbnbInfo2: { title: "Reserva - Depto 2, CasaBontu", content: () => { return ` <img src="https://placehold.co/600x400/C2B2A2/FFFFFF?text=CasaBontu" alt="Foto do apartamento em Mendoza" class="rounded-lg mb-4"> <div class="bg-gray-100 p-3 rounded-lg text-center mb-4"> <p class="text-xs text-gray-500">Código de Confirmação Airbnb</p> <p class="font-bold text-lg text-gray-800 tracking-widest">HMTRP5N4SQ</p> </div> <div class="border-t border-gray-200 pt-4"> <h4 class="font-semibold text-gray-800 mb-2">Check-in / Checkout</h4> <p><strong>Check-in:</strong> Sábado, 09 de Ago. - a partir das 14:00 (Self check-in com fechadura inteligente)</p> <p><strong>Checkout:</strong> Sexta, 15 de Ago. - até 10:00</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Endereço</h4> <p>Martínez de Rozas 1165</p> <p>Capital, Mendoza, Argentina</p> </div> <div class="border-t border-gray-200 pt-4 mt-4"> <h4 class="font-semibold text-gray-800 mb-2">Anfitriã</h4> <p>Emiliana</p> </div> `; } },
+                mendozaLeisure: { title: "Tarde e Noite Livres em Mendoza", content: () => { const cafes = [ { name: "Bröd Panadería", description: "Padaria artesanal com excelentes cafés e doces.", link: "https://www.instagram.com/brod.mza/" }, { name: "Jebbs", description: "Cafeteria com ambiente moderno e ótimas opções de brunch.", link: "https://www.instagram.com/jebbs.ok/" }, { name: "Fran Coffee Makers", description: "Para amantes de café especial, com grãos selecionados.", link: "https://www.instagram.com/franco_coffeemakers/" } ]; const activities = [ { name: "Passeio pela Peatonal Sarmiento", description: "Calçadão charmoso, repleto de lojas, cafés e artistas de rua.", link: "https://www.instagram.com/explore/locations/237466536/peatonal-sarmiento-mendoza/" }, { name: "Visita ao Mercado Central", description: "Explore os sabores locais, com frutas secas, azeitonas, queijos e vinhos.", link: "https://www.instagram.com/mercadocentralmza/" }, { name: "Caminhada no Parque General San Martín", description: "Relaxe em um dos maiores parques urbanos da Argentina, com um belo lago e jardins.", link: "https://www.instagram.com/parquesdemendoza/" } ]; return ` <h4 class="font-semibold text-gray-800 mb-2">Sugestões de Cafés</h4> ${cafes.map(r => ` <div class="border-b border-gray-100 pb-3 mb-3"> <div class="flex justify-between items-start"> <div> <h4 class="font-semibold text-gray-800">${r.name}</h4> <p class="text-gray-600">${r.description}</p> </div> <a href="${r.link}" target="_blank" class="ml-4 flex-shrink-0 text-xs bg-blue-500 text-white font-semibold px-2 py-1 rounded-md hover:bg-blue-600 transition-colors">Visitar</a> </div> </div> `).join('')} <h4 class="font-semibold text-gray-800 mb-2 mt-4">Atividades Leves</h4> ${activities.map(r => ` <div class="border-b border-gray-100 pb-3 mb-3"> <div class="flex justify-between items-start"> <div> <h4 class="font-semibold text-gray-800">${r.name}</h4> <p class="text-gray-600">${r.description}</p> </div> <a href="${r.link}" target="_blank" class="ml-4 flex-shrink-0 text-xs bg-blue-500 text-white font-semibold px-2 py-1 rounded-md hover:bg-blue-600 transition-colors">Visitar</a> </div> </div> `).join('')} `; } },
+                share: { title: "Compartilhar Roteiro", content: () => { return ` <p class="text-center mb-2">Copie o link abaixo para compartilhar o roteiro da viagem:</p> <div class="flex items-center space-x-2"> <input readonly id="share-link-input" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700" value="${window.location.href}"> <button id="copy-link-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 font-semibold">Copiar</button> </div> <p id="copy-notification" class="text-center text-green-600 font-semibold mt-2 opacity-0 transition-opacity">Link copiado!</p> `; } },
+                packingList: {
+                    title: "✨ Assistente de Malas",
+                    content: () => {
+                        return `
+                            <p class="text-center text-slate-600 mb-4">Com base no seu roteiro (inverno, neve, vinícolas), nossa IA vai gerar uma lista de malas inteligente para 2 pessoas.</p>
+                            <button id="generate-packing-list-btn" class="gemini-generate-btn w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2" 
+                                data-prompt="Você é um assistente de viagens especialista. Crie uma lista de malas detalhada para uma viagem de 10 dias para Mendoza e Las Leñas, Argentina, em agosto (inverno). A viagem inclui dias de esqui na neve, visitas a vinícolas e exploração da cidade. A lista deve ser para 2 pessoas (um homem e uma mulher). Organize a lista em categorias (Roupas Essenciais, Roupas de Frio/Neve, Calçados, Acessórios, Higiene e Farmácia, Documentos e Dinheiro, Eletrônicos). O formato da resposta deve ser em HTML, usando títulos h5 para cada categoria e uma lista não ordenada <ul> com <li> para os itens. Não inclua <html> ou <body> tags."
+                                data-target-id="packing-list-result">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="m12 3-1.9 4.2-4.3.6 3.1 3-1 4.2 3.8-2.2 3.8 2.2-1-4.2 3.1-3-4.3-.6L12 3zM5 13l-1 2.2-2.2.3.8 2.1-1.5 2.4 2.6-.1 1.6 2.1 1.6-2 .8.1-1.5-2.4.8-2-2.2-.3L5 13zm14 0-1 2.2-2.2.3.8 2.1-1.5 2.4 2.6-.1 1.6 2.1 1.6-2 .8.1-1.5-2.4.8-2-2.2-.3L19 13z"/></svg>
+                                <span>Gerar Lista de Malas</span>
+                            </button>
+                            <div id="packing-list-result" class="mt-4 text-sm text-left gemini-result"></div>
+                        `;
+                    }
+                },
+                whatToWear: {
+                    title: "✨ O que vestir hoje?",
+                    content: (dayData) => {
+                        const activities = dayData.schedule.map(s => s.event).join(', ');
+                        const location = dayData.title.includes("Los Molles") || dayData.title.includes("Ski") ? "na montanha (Las Leñas/Los Molles)" : "na cidade de Mendoza";
+                        const prompt = `Você é um personal stylist especialista em viagens. Crie uma sugestão de look para um homem e uma mulher para um dia de viagem em Mendoza, Argentina, em agosto (inverno). O clima é frio e seco, com temperaturas entre -2°C e 10°C. As atividades do dia são: ${activities}, ${location}. A sugestão deve ser prática e estilosa, em formato HTML, usando títulos h5 para 'Look Masculino' e 'Look Feminino' e uma lista <ul> para as peças. Não inclua <html> ou <body> tags.`;
+                        return `
+                            <p class="text-center text-slate-600 mb-4">Com base no clima e nas atividades de hoje (${activities}), a IA pode sugerir o que vestir.</p>
+                            <button class="gemini-generate-btn w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2" data-prompt="${prompt}" data-target-id="what-to-wear-result">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="m12 3-1.9 4.2-4.3.6 3.1 3-1 4.2 3.8-2.2 3.8 2.2-1-4.2 3.1-3-4.3-.6L12 3zM5 13l-1 2.2-2.2.3.8 2.1-1.5 2.4 2.6-.1 1.6 2.1 1.6-2 .8.1-1.5-2.4.8-2-2.2-.3L5 13zm14 0-1 2.2-2.2.3.8 2.1-1.5 2.4 2.6-.1 1.6 2.1 1.6-2 .8.1-1.5-2.4.8-2-2.2-.3L19 13z"/></svg>
+                                <span>Gerar Sugestão</span>
+                            </button>
+                            <div id="what-to-wear-result" class="mt-4 text-sm text-left gemini-result"></div>
+                        `;
+                    }
+                },
+                photoTips: {
+                    title: "✨ Dicas de Fotografia",
+                    content: (dayData) => {
+                        const location = dayData.title;
+                        const prompt = `Você é um fotógrafo de viagens profissional. Dê 5 dicas práticas de fotografia para um casal que visitará '${location}' em Mendoza, Argentina. As dicas devem ser úteis para fotógrafos amadores usando celulares ou câmeras simples. Foque em composição, luz e como capturar a essência do lugar. Formate a resposta em HTML, com um título h5 para cada dica e um parágrafo <p> explicando-a. Não inclua <html> ou <body> tags.`;
+                        return `
+                            <p class="text-center text-slate-600 mb-4">Receba dicas de um fotógrafo profissional para capturar os melhores momentos no seu passeio de hoje: ${location}.</p>
+                            <button class="gemini-generate-btn w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2" data-prompt="${prompt}" data-target-id="photo-tips-result">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                <span>Gerar Dicas</span>
+                            </button>
+                            <div id="photo-tips-result" class="mt-4 text-sm text-left gemini-result"></div>
+                        `;
+                    }
+                }
+            };
+
+            // --- ELEMENTOS DO DOM ---
+            const dateNav = document.getElementById('date-nav');
+            const itineraryContent = document.getElementById('itinerary-content');
+            const genericModal = document.getElementById('generic-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDetails = document.getElementById('modal-details');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+
+            // --- MAPA DE ÍCONES ---
+            const icons = { plane: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plane"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1.5-1.5-3-1-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>`, 'mountain-snow': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mountain-snow"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2.19 8.23.19"/></svg>`, 'person-standing': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg>`, car: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9L1 16v1c0 .6.4 1 1 1h2"/><path d="M14 17H9"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>`, mountain: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mountain"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>`, bath: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bath"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-2.12 0L3 4.88a1.5 1.5 0 0 0 0 2.12L5.5 9"/><path d="M12.5 2.5a1.5 1.5 0 0 0-2.12 0L9 4.88a1.5 1.5 0 0 0 0 2.12l2.5 2.5"/><path d="M18 14h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2"/><path d="M22 18v-2a2 2 0 0 0-2-2h-2"/><path d="m2 12 1 1v5c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-5l1-1"/><path d="M12 12H4v8h16v-8h-8Z"/></svg>`, wine: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wine"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg>`, grape: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grape"><path d="M22 5V2l-5.89 5.89"/><path d="M16.6 15.89 22 10.5V7"/><circle cx="8" cy="22" r="2"/><circle cx="16" cy="16" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="6" cy="16" r="2"/><path d="M10 20.5c.7-.2 1.3-1 1-1.5-3.2-4.2-2-9.5 2.3-12.8.5-.4 1.1.3 1.2.7 2.3 8.4-5.3 12.6-6.8 13.6Z"/></svg>`, compass: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`, send: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>` };
+            
+            // --- FUNÇÕES ---
+            const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+            const getStatusBadge = (status) => {
+                switch (status) {
+                    case 'Pago': return 'bg-green-100 text-green-800';
+                    case 'Estimativa': return 'bg-yellow-100 text-yellow-800';
+                    case 'Reservado': return 'bg-blue-100 text-blue-800';
+                    case 'Não Pago':
+                    case 'Não Reservado':
+                        return 'bg-red-100 text-red-800';
+                    default: return 'bg-slate-100 text-slate-800';
+                }
+            };
+            
+            const renderFlightCard = (flight) => {
+                return `
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold text-blue-900 text-base">Voo ${flight.flightNumber}</span>
+                            <span class="text-blue-600">${icons.plane}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="text-center">
+                                <p class="font-bold text-xl text-slate-800">${flight.departure.time}</p>
+                                <p class="text-slate-600">${flight.departure.airport}</p>
+                            </div>
+                            <div class="flex-grow text-center px-4">
+                                <div class="w-full h-px bg-slate-300 border-t border-dashed"></div>
+                            </div>
+                            <div class="text-center">
+                                <p class="font-bold text-xl text-slate-800">${flight.arrival.time}</p>
+                                <p class="text-slate-600">${flight.arrival.airport}</p>
+                            </div>
+                        </div>
+                        ${flight.arrival.note ? `<p class="text-xs text-center text-slate-500 mt-2">${flight.arrival.note}</p>` : ''}
+                    </div>
+                `;
+            };
+
+            const renderDay = (date) => {
+                const dayData = itineraryData.find(d => d.date === date);
+                if (!dayData) {
+                    itineraryContent.innerHTML = `<p>Selecione uma data.</p>`;
+                    return;
+                }
+                
+                let scheduleHtml;
+                if (dayData.isFreeDayPlanner) {
+                    scheduleHtml = `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-semibold text-lg mb-3 text-slate-800">✨ Gerador de Roteiro</h3>
+                            <p class="text-sm text-slate-600 mb-3">Escolha um estilo de viagem para receber sugestões personalizadas da nossa IA.</p>
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <button data-mood="relaxante" class="gemini-mood-btn p-3 bg-green-100 text-green-800 rounded-lg font-semibold hover:bg-green-200 transition-colors flex items-center justify-center space-x-2"><span>😌</span><span>Relaxante</span></button>
+                                <button data-mood="aventura" class="gemini-mood-btn p-3 bg-orange-100 text-orange-800 rounded-lg font-semibold hover:bg-orange-200 transition-colors flex items-center justify-center space-x-2"><span>🧗</span><span>Aventura</span></button>
+                                <button data-mood="cultural" class="gemini-mood-btn p-3 bg-blue-100 text-blue-800 rounded-lg font-semibold hover:bg-blue-200 transition-colors flex items-center justify-center space-x-2"><span>🏛️</span><span>Cultural</span></button>
+                                <button data-mood="gastronômico" class="gemini-mood-btn p-3 bg-red-100 text-red-800 rounded-lg font-semibold hover:bg-red-200 transition-colors flex items-center justify-center space-x-2"><span>🍷</span><span>Gastronômico</span></button>
+                            </div>
+                            <div id="free-day-result" class="mt-4 p-4 bg-slate-50 rounded-lg min-h-[150px] gemini-result border border-slate-200">
+                                <p class="text-center text-slate-500">Selecione uma opção acima para começar.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const lastEventIndex = dayData.schedule.findLastIndex(item => item.type !== 'flight');
+                    scheduleHtml = `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-semibold text-lg mb-4 text-slate-800">Programação</h3>
+                            <ul class="space-y-1">
+                            ${dayData.schedule.map((item, index) => {
+                                if (item.type === 'flight') {
+                                    return `<li class="py-2">${renderFlightCard(item)}</li>`;
+                                }
+                                const isLastEvent = index === lastEventIndex;
+                                return `
+                                    <li class="relative pl-8 ${!isLastEvent ? 'pb-6' : ''}">
+                                        ${!isLastEvent ? '<div class="absolute left-[7px] top-5 h-full border-l-2 border-purple-200 z-0"></div>' : ''}
+                                        <div class="absolute left-0 top-1 w-4 h-4 bg-purple-500 rounded-full border-4 border-white z-10"></div>
+                                        <div class="flex justify-between items-start timeline-item-content">
+                                            <div>
+                                                <p class="font-semibold text-slate-700">${item.time}</p>
+                                                <p class="text-slate-600 text-sm">${item.event}</p>
+                                            </div>
+                                            ${item.modalId ? `<button data-modal-id="${item.modalId}" class="modal-trigger-btn text-xs bg-purple-100 text-purple-700 font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition-colors flex items-center space-x-1">
+                                                <span>Detalhes</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                            </button>` : ''}
+                                        </div>
+                                    </li>
+                                `;
+                            }).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                let html = `
+                    <div class="animate-fade-in space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center shadow-sm">${icons[dayData.icon]}</div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-slate-900">${dayData.title}</h2>
+                                    <p class="text-sm text-slate-500">${dayData.dayOfWeek}, ${new Date(dayData.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</p>
+                                </div>
+                            </div>
+                             <button data-modal-id="whatToWear" data-date="${dayData.date}" class="modal-trigger-btn text-xs bg-slate-100 text-slate-700 font-semibold px-3 py-2 rounded-full hover:bg-slate-200 transition-colors flex items-center space-x-1.5 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                <span>Vestir</span>
+                            </button>
+                        </div>
+
+                        ${scheduleHtml}
+                        
+                        ${dayData.travelInfo || dayData.mapUrl ? `
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                <h3 class="font-semibold text-lg mb-3 text-slate-800">Deslocamento</h3>
+                                ${dayData.mapUrl || (dayData.travelInfo && dayData.travelInfo.mapUrl) ? `
+                                    <a href="${dayData.mapUrl || dayData.travelInfo.mapUrl}" target="_blank" class="mb-3 text-sm inline-block w-full bg-blue-500 text-white text-center font-bold py-2.5 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pinned"><path d="M18 8c0 4.5-6 9-6 9s-6-4.5-6-9a6 6 0 0 1 12 0Z"/><circle cx="12" cy="8" r="2"/><path d="M8.83 15.17a2 2 0 0 0 2.34 2.34l3.63-3.63a2 2 0 0 0-2.34-2.34L8.83 15.17Z"/><path d="M12 22v-3"/><path d="M12 2v3"/></svg>
+                                        <span>Ver Rota Completa do Dia</span>
+                                    </a>
+                                ` : ''}
+                                ${dayData.travelInfo && dayData.travelInfo.legs ? `
+                                    <div class="space-y-3 pt-3 border-t border-slate-200">
+                                        <h4 class="font-semibold text-sm text-slate-600 -mb-1">Trechos:</h4>
+                                        ${dayData.travelInfo.legs.map(leg => `
+                                            <div class="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                                                <div class="flex justify-between items-center">
+                                                    <div>
+                                                        <p class="font-semibold text-sm text-slate-700">${leg.from} → ${leg.to}</p>
+                                                        <p class="text-xs text-slate-500">${leg.distance} (${leg.time})</p>
+                                                    </div>
+                                                    <a href="${leg.mapUrl}" target="_blank" class="text-xs text-blue-600 hover:underline">Mapa</a>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : (dayData.travelInfo && dayData.travelInfo.distance ? `
+                                    <p class="text-sm text-slate-500">Distância total: ${dayData.travelInfo.distance} (${dayData.travelInfo.time})</p>
+                                ` : '')}
+                            </div>
+                        ` : ''}
+
+
+                        ${dayData.liveCam ? `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-semibold text-lg mb-3 text-slate-800">${dayData.liveCam.title}</h3>
+                            <div class="aspect-video rounded-lg overflow-hidden">
+                                <iframe class="w-full h-full" src="${dayData.liveCam.url}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${dayData.costs.length > 0 ? `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-semibold text-lg mb-3 text-slate-800">Custos do Dia</h3>
+                            <div class="space-y-2">
+                                ${dayData.costs.map(cost => `
+                                    <div class="bg-slate-50/60 p-3 rounded-lg flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium text-slate-700">${cost.item}</p>
+                                            <p class="text-xs text-slate-500">Pago por: ${cost.paidBy}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-semibold text-slate-800">${formatCurrency(cost.amount)}</p>
+                                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${getStatusBadge(cost.status)}">${cost.status}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${dayData.daySummary ? `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                             <h3 class="font-semibold text-lg mb-2 text-slate-800">${dayData.daySummary.title}</h3>
+                             <p class="text-slate-600 text-sm leading-relaxed">${dayData.daySummary.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>
+                             
+                             ${dayData.daySummary.wineries ? `
+                                <div class="mt-4 space-y-4">
+                                    ${dayData.daySummary.wineries.map(winery => `
+                                        <div class="border-t border-slate-200 pt-4">
+                                            <div class="flex justify-between items-center">
+                                                <h4 class="font-bold text-md text-purple-800">${winery.name}</h4>
+                                                <a href="${winery.website}" target="_blank" class="text-xs text-blue-600 font-semibold hover:underline">Website</a>
+                                            </div>
+                                            <p class="text-sm text-slate-600 mt-1">${winery.history}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                             ` : ''}
+
+                             ${dayData.daySummary.curiosities ? `
+                                <div class="mt-4 border-t border-slate-200 pt-4">
+                                    ${dayData.daySummary.curiosities.title ? `<h4 class="font-bold text-md text-purple-800 mb-2">${dayData.daySummary.curiosities.title}</h4>` : ''}
+                                    ${dayData.daySummary.curiosities.items && dayData.daySummary.curiosities.items.length > 0 ? `
+                                        <ul class="space-y-3">
+                                            ${dayData.daySummary.curiosities.items.map(item => `
+                                                <li>
+                                                    <p class="font-semibold text-slate-700 text-sm">${item.title}</p>
+                                                    <p class="text-slate-600 text-sm">${item.text}</p>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : ''}
+                                    ${dayData.daySummary.curiosities.externalLink ? `
+                                        <a href="${dayData.daySummary.curiosities.externalLink.url}" target="_blank" class="mt-4 text-sm inline-block w-full bg-blue-500 text-white text-center font-bold py-2.5 px-4 rounded-lg hover:bg-blue-600 transition-colors">${dayData.daySummary.curiosities.externalLink.text}</a>
+                                    ` : ''}
+                                     ${dayData.daySummary.curiosities.isScenic ? `
+                                        <button data-modal-id="photoTips" data-date="${dayData.date}" class="modal-trigger-btn mt-2 text-sm inline-block w-full bg-cyan-100 text-cyan-800 text-center font-bold py-2.5 px-4 rounded-lg hover:bg-cyan-200 transition-colors flex items-center justify-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                            <span>Dicas de Fotografia</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                             ` : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                itineraryContent.innerHTML = html;
+            };
+            
+            const populateDateNav = () => {
+                itineraryData.forEach(day => {
+                    const dateObj = new Date(day.date + 'T00:00:00');
+                    const dayOfMonth = dateObj.getDate();
+                    const dayOfWeekShort = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
+                    const button = document.createElement('button');
+                    button.className = 'date-tab inline-block text-center px-4 py-2 mr-2 rounded-lg transition-colors duration-200';
+                    button.dataset.date = day.date;
+                    button.innerHTML = `
+                        <span class="block text-xs font-medium text-slate-500">${dayOfWeekShort}</span>
+                        <span class="block text-lg font-bold">${dayOfMonth}</span>
+                    `;
+                    dateNav.appendChild(button);
+                });
+            };
+
+            const setActiveTab = (date) => {
+                document.querySelectorAll('.date-tab').forEach(tab => {
+                    if (tab.dataset.date === date) {
+                        tab.classList.add('bg-purple-100', 'text-purple-700');
+                        tab.classList.remove('text-slate-600');
+                        tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        tab.classList.remove('bg-purple-100', 'text-purple-700');
+                        tab.classList.add('text-slate-600');
+                    }
+                });
+            };
+
+            const toggleModal = (show) => {
+                const content = genericModal.querySelector('.modal-content');
+                if (show) {
+                    genericModal.classList.remove('hidden');
+                    void genericModal.offsetWidth;
+                    genericModal.classList.add('opacity-100');
+                    content.classList.add('scale-100');
+                    content.classList.remove('scale-95');
+                } else {
+                    genericModal.classList.remove('opacity-100');
+                    content.classList.remove('scale-100');
+                    content.classList.add('scale-95');
+                    setTimeout(() => genericModal.classList.add('hidden'), 300);
+                }
+            };
+            
+            const showModal = (modalId, date) => {
+                const data = modalData[modalId];
+                if (data) {
+                    modalTitle.textContent = data.title;
+                    if (typeof data.content === 'function') {
+                        if (date) {
+                            const dayData = itineraryData.find(d => d.date === date);
+                            modalDetails.innerHTML = data.content(dayData);
+                        } else {
+                            modalDetails.innerHTML = data.content();
+                        }
+                    } else {
+                        modalDetails.innerHTML = data.content;
+                    }
+                    toggleModal(true);
+                }
+            };
+            
+            async function callGemini(prompt, resultElement) {
+                resultElement.innerHTML = '<div class="flex justify-center items-center h-full"><div class="spinner"></div></div>';
+                
+                const apiKey = ""; // A chave será injetada pelo ambiente
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [{ text: prompt }]
+                    }]
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro na API: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        resultElement.innerHTML = text;
+                    } else {
+                        throw new Error("Resposta inválida da API.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao chamar a API Gemini:", error);
+                    resultElement.innerHTML = `<p class="text-red-500 text-center">Desculpe, não foi possível gerar as sugestões. Tente novamente mais tarde.</p>`;
+                }
+            }
+
+            // --- INICIALIZAÇÃO ---
+            let initialDate = itineraryData[0].date;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayData = itineraryData.find(d => new Date(d.date + 'T00:00:00').getTime() === today.getTime());
+            if(todayData) {
+                initialDate = todayData.date;
+            }
+            
+            populateDateNav();
+            renderDay(initialDate);
+            setActiveTab(initialDate);
+
+
+            // --- EVENT LISTENERS ---
+            dateNav.addEventListener('click', (e) => {
+                const tab = e.target.closest('.date-tab');
+                if (tab) {
+                    const date = tab.dataset.date;
+                    renderDay(date);
+                    setActiveTab(date);
+                }
+            });
+            
+            document.body.addEventListener('click', (e) => {
+                const triggerBtn = e.target.closest('.modal-trigger-btn');
+                if (triggerBtn) {
+                    const modalId = triggerBtn.dataset.modalId;
+                    const date = triggerBtn.dataset.date;
+                    showModal(modalId, date);
+                }
+                
+                if (e.target.id === 'copy-link-btn') { 
+                    const input = document.getElementById('share-link-input');
+                    input.select();
+                    input.setSelectionRange(0, 99999); 
+                    document.execCommand('copy');
+                    
+                    const notification = document.getElementById('copy-notification');
+                    notification.classList.remove('opacity-0');
+                    setTimeout(() => {
+                        notification.classList.add('opacity-0');
+                    }, 2000);
+                 }
+            });
+
+            modalDetails.addEventListener('click', (e) => {
+                const generateBtn = e.target.closest('.gemini-generate-btn');
+                if (generateBtn) {
+                    const prompt = generateBtn.dataset.prompt;
+                    const targetId = generateBtn.dataset.targetId;
+                    const resultElement = document.getElementById(targetId);
+                    if (prompt && resultElement) {
+                        callGemini(prompt, resultElement);
+                        generateBtn.style.display = 'none'; // Hide after click
+                    }
+                }
+            });
+
+            closeModalBtn.addEventListener('click', () => toggleModal(false));
+            genericModal.addEventListener('click', (e) => {
+                if (e.target === genericModal) {
+                    toggleModal(false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
